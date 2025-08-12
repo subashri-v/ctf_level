@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Crime Scene</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+        
+        body {
+            font-family: 'Special Elite', monospace;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url('https://img.freepik.com/free-photo/grunge-metal-background-with-bloody-splatters_1048-5868.jpg?semt=ais_hybrid&w=740&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 150px rgba(0,0,0,0.9);
+            pointer-events: none;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+ 
+        .case-file {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 40px;
+            text-align: center;
+            color: #ccc;
+            max-width: 650px;
+            width: 90%;
+            min-height: 450px;
+
+        }
+
+        h1 {
+            color: #c81b1b;
+            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            border-bottom: 2px solid #555;
+            display: inline-block; 
+            padding-bottom: 5px;
+            text-shadow: 0 0 5px rgba(178, 34, 34, 0.5);
+            animation: flicker 3s infinite alternate;
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #fff; 
+            text-shadow: 2px 2px 4px #000;
+            color: #fff; 
+            text-shadow: 2px 2px 4px #000; 
+        }
+
+        .input-group {
+            margin: 30px 0;
+        }
+
+        input[type="text"] {
+            background-color: rgba(0,0,0,0.5);
+            border: 1px solid #444;
+            color: #eee;
+            padding: 10px;
+            font-family: 'Special Elite', monospace;
+            font-size: 1.2em;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #b22222;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Special Elite', monospace;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(0,0,0,0.5); 
+            border-radius: 4px;
+            font-size: 1.1em;
+            min-height: 2em;
+            line-height: 2em;
+            font-weight: bold;
+        }
+
+        a {
+            color: #e1dcdc; 
+            text-decoration: none;
+            display: block;
+            margin-top: 40px;
+            font-style: italic;
+            animation: pulse 2s infinite;
+            font-size: 1.1em;
+        }
+
+        .hint {
+            color: #c0bfbf;
+            font-size: 1em;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            font-style: italic;
+            word-wrap: break-word;
+            border-top: 1px dashed #444;
+            padding-top: 15px;
+        }
+
+        .success { color: #2e8b57; font-style:oblique;}
+        .error { color: #b22222; }
+
+        a {
+            color: #e1dcdc;
+            text-decoration: none;
+            display: block;
+            margin-top: 40px;
+            font-style: italic;
+            animation: pulse 2s infinite;
+            font-size: 1.1em;
+        }
+
+
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% {
+                text-shadow: 0 0 4px #b22222, 0 0 11px #b22222, 0 0 19px #b22222;
+                opacity: 1;
+            }
+            20%, 24%, 55% { text-shadow: none; opacity: 0.8; }
+        }
+
+        @keyframes pulse {
+            0% { text-shadow: 0 0 7px rgba(255, 255, 255, 0.2); }
+            50% { text-shadow: 0 0 25px rgb(250, 246, 246,0.9); }
+            100% { text-shadow: 0 0 7px rgba(255, 255, 255, 0.2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="case-file">
+            <h1>The Crime Scene</h1>
+            <p>A single piece of evidence is missing...a single word.<br>What did the witness say?</p>
+            <div class="input-group">
+                <input type="text" id="key_input" placeholder="Enter the key...">
+                <button onclick="checkKey()">Submit</button>
+            </div>
+            <div id="output">...</div>
+            <p class="hint" id="text_hint" style="display: none;" title="A cryptic final note...">.. - .----. ... / .- - / - .... . / -... .- ... . --..-- / ... .. -..- - -.-- -....- ..-. --- ..- .-. / ... - . .--. ... / ..-. .-. --- -- / - .... . / - .-. ..- - .... .-.-.-</p>
+            <a href="page2.html">Knock, knock. Who's there?</a>
+        </div>
+    </div>
+
+    <script>
+        console.log(`%c ... a clue?`, 'color: #b22222; font-weight: bold;');
+
+        async function checkKey() {
+            const userInput = document.getElementById('key_input').value.trim();
+            const outputDiv = document.getElementById('output');
+            const correctKeyHash = '0cfcb266d7020a7a0a64d2821a08c9f7babe8ebc2b3ea1852b43a76aa8c5d5a7';
+            
+            async function sha256(message) {
+                const msgBuffer = new TextEncoder().encode(message);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            const userInputHash = await sha256(userInput.toUpperCase());
+
+            if (userInputHash === correctKeyHash) {
+                try {
+                    const response = await fetch('/.netlify/functions/get-flag');
+                    const data = await response.json();
+                    const encryptedFlag = data.flag;
+
+                    outputDiv.textContent = `The final clue: ${encryptedFlag}`;
+                    outputDiv.className = 'success';
+                    document.getElementById('text_hint').style.display = 'block';
+                } catch (error) {
+                    console.error("Error fetching flag:", error);
+                    outputDiv.textContent = 'Failed to retrieve clue.';
+                    outputDiv.className = 'error';
+                }
+            } else {
+                outputDiv.textContent = 'The trail goes cold... That\'s not it.';
+                outputDiv.className = 'error';
+                document.getElementById('text_hint').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Interrogation Room</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+        
+        body {
+            font-family: 'Special Elite', monospace;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url('https://t4.ftcdn.net/jpg/14/24/17/95/360_F_1424179559_qDfqMgGfiNTncwKQ50ShWGyBPFTccYBx.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 150px rgba(0,0,0,0.9);
+            pointer-events: none;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 2;
+        }
+
+        .interrogation-room {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 40px;
+            text-align: center;
+            color: #ccc;
+            max-width: 700px;
+            width: 90%;
+            min-height: 450px;
+            font-family: 'Special Elite', monospace;
+        }
+
+        h1 {
+            color:#c81b1b;
+            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            border-bottom: 2px solid #555;
+            display: inline-block;
+            padding-bottom: 5px;
+            text-shadow: 2px 2px 5px #000;
+            animation: flicker 3s infinite alternate;
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #ddd;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .clues {
+            border-left: 3px solid #b22222;
+            margin: 30px auto;
+            padding: 0 20px;
+            text-align: left;
+            max-width: 450px;
+            background: transparent;
+            border-radius: 5px;
+        }
+
+        .clues p {
+            margin: 8px 0;
+            font-style: italic;
+            color: #aaa;
+        }
+
+        input[type="text"] {
+            background-color: rgba(0,0,0,0.5);
+            border: 1px solid #444;
+            color: #eee;
+            padding: 10px;
+            font-family: 'Special Elite', monospace;
+            font-size: 1.2em;
+            text-align: center;
+            border-radius: 4px;
+            width: 250px;
+            margin-right: 10px;
+        }
+
+        button {
+            background-color: #b22222;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Special Elite', monospace;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        #static-output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 4px;
+            font-size: 1.1em;
+            min-height: 2em;
+            line-height: 2em;
+            font-weight: bold;
+            color: #2ead65;
+            display: block;
+        }
+
+        #dynamic-output-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .falling-word {
+            position: absolute;
+            font-size: 1.5em;
+            font-weight: bold;
+            white-space: nowrap;
+            color: rgba(220, 220, 220, 0.4);
+            transform: translateY(-100%);
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh);
+                opacity: 0;
+            }
+        }
+
+        .success-message { color: #2ead65; }
+        .error-message { color: #b22222; }
+
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% {
+                text-shadow: 0 0 4px #b22222, 0 0 11px #b22222, 0 0 19px #b22222;
+                opacity: 1;
+            }
+            20%, 24%, 55% { text-shadow: none; opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="interrogation-room">
+            <h1>The Interrogation</h1>
+            <p>The machine sees beyond the words, measuring every lie.<br>Provide the key sequence, and a silent confession will be made.</p>
+
+            <div class="clues">
+                <p>The numbers count, in ways both new and old,</p>
+                <p>A tale in hex, in decimal it's told.</p>
+                <p>A leap you take, a single choice to make,</p>
+                <p>For "flag" is the pattern you must break.</p>
+            </div>
+
+            <input type="text" id="input_val" placeholder="Enter hex value...">
+            <button onclick="runLabyrinth()">Interrogate</button>
+            <div id="static-output">Awaiting sequence...</div>
+        </div>
+    </div>
+    <div id="dynamic-output-container"></div>
+    <script>
+        console.log(`%c They all lie. The machine doesn't.`, 'color: #888; font-style: italic;');
+        const staticOutput = document.getElementById('static-output');
+        const dynamicOutputContainer = document.getElementById('dynamic-output-container');
+        let wasmInstance = null;
+        let cycleInterval = null;
+        let words = [];
+
+        async function loadWebAssembly() {
+            try {
+                const response = await fetch('logic_page2.wasm');
+                const buffer = await response.arrayBuffer();
+                const module = await WebAssembly.compile(buffer);
+                wasmInstance = await WebAssembly.instantiate(module, {});
+                staticOutput.textContent = "System online.";
+            } catch (e) {
+                staticOutput.textContent = `System Failure: ${e.message}`;
+                staticOutput.className = 'error-message';
+            }
+        }
+
+        function runLabyrinth() {
+            if (!wasmInstance) return;
+            const inputStr = document.getElementById('input_val').value.trim();
+            let numericInput;
+
+            try {
+                if (!inputStr.startsWith("0x")) throw new Error("Invalid sequence format.");
+                numericInput = parseInt(inputStr, 16);
+                if (isNaN(numericInput)) throw new Error("Sequence unrecognized.");
+                numericInput = numericInput >>> 0;
+            } catch (e) {
+                if (cycleInterval) clearInterval(cycleInterval);
+                staticOutput.style.display = 'block';
+                staticOutput.textContent = e.message;
+                staticOutput.className = 'error-message';
+                clearDynamicOutput();
+                return;
+            }
+
+            try {
+                const result = wasmInstance.exports.process_and_check(numericInput);
+                if (result === 0) {
+                    if (cycleInterval) clearInterval(cycleInterval);
+                    staticOutput.style.display = 'none';
+                    clearDynamicOutput();
+
+                    const pointer = wasmInstance.exports.get_key_ptr();
+                    const memory = new Uint8Array(wasmInstance.exports.memory.buffer);
+                    let stringEnd = pointer;
+                    while (memory[stringEnd] !== 0) { stringEnd++; }
+                    const keyBytes = memory.subarray(pointer, stringEnd);
+                    const key = new TextDecoder().decode(keyBytes);
+                    words = key.split('|');
+
+                    cycleInterval = setInterval(generateFallingWords, 1500);
+                } else {
+                    if (cycleInterval) clearInterval(cycleInterval);
+                    staticOutput.style.display = 'block';
+                    const unsignedHex = (result >>> 0).toString(16).toUpperCase().padStart(8, '0');
+                    staticOutput.textContent = `It's a lie... The machine responds with: 0x${unsignedHex}`;
+                    staticOutput.className = 'error-message';
+                    clearDynamicOutput();
+                }
+            } catch (e) {
+                if (cycleInterval) clearInterval(cycleInterval);
+                staticOutput.style.display = 'block';
+                staticOutput.textContent = `Runtime Error: ${e.message}`;
+                staticOutput.className = 'error-message';
+                clearDynamicOutput();
+            }
+        }
+        
+        function generateFallingWords() {
+            const screenWidth = window.innerWidth;
+            const randomWord = words[Math.floor(Math.random() * words.length)];
+            const wordElement = document.createElement('span');
+            wordElement.textContent = randomWord;
+            wordElement.className = 'falling-word';
+            
+            const randomSize = Math.random() * 0.7 + 0.8;
+            wordElement.style.left = `${Math.random() * screenWidth}px`;
+            wordElement.style.animationDelay = `${Math.random() * 5}s`;
+            wordElement.style.animationDuration = `${Math.random() * 10 + 5}s`;
+            wordElement.style.fontSize = `${randomSize}em`;
+            
+            dynamicOutputContainer.appendChild(wordElement);
+            
+            wordElement.addEventListener('animationend', () => {
+                wordElement.remove();
+            });
+        }
+        
+        function clearDynamicOutput() {
+            while (dynamicOutputContainer.firstChild) {
+                dynamicOutputContainer.removeChild(dynamicOutputContainer.firstChild);
+            }
+        }
+
+        window.onload = loadWebAssembly;
+    </script>
+</body>
+</html>

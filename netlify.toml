@@ -1,0 +1,9 @@
+# This is the build configuration for Netlify.
+
+[build]
+  # This line tells Netlify where to find your serverless function files.
+  functions = "netlify/functions"
+  
+  # This line tells Netlify that your main website files (like index.html)
+  # are in the root of the project.
+  publish = "."
