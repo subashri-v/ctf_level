@@ -193,7 +193,7 @@
 
             if (userInputHash === correctKeyHash) {
                 try {
-                    const response = await fetch('/.netlify/functions/get_flag');
+                    const response = await fetch('/.netlify/functions/get_flag', { method: 'POST' });
                     const data = await response.json();
                     const encryptedFlag = data.flag;
 
@@ -214,6 +214,7 @@
     </script>
 </body>
 </html>
+
 
 
 
