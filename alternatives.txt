@@ -1,0 +1,19 @@
+VGhlIHdheSBpdOKAmXMgd3JpdHRlbiBzcGVha3Mgdm9sdW1lcy4
+The way it’s written speaks volumes.
+
+TWVhbmluZyBpcyBvdmVycmF0ZWQ7IHN0eWxlIGlzIGV2ZXJ5dGhpbmcu
+Meaning is overrated; style is everything.
+
+TWVhbmluZyBpcyBvdmVycmF0ZWQ7IGZvbnQgaXMgZXZlcnl0aGluZy4
+Meaning is overrated; font is everything.
+
+TG9vayB3aGVyZSBmb250IGFuZCBzdHlsZSBjcm9zcyBwYXRocy4
+Look where font and style cross paths.
+
+font-style: italic;
+font-style: oblique;
+font-style: normal;
+
+font-family: "Times New Roman";
+font-family: "Helvetica";
+font-family: "Consolas";
